@@ -124,6 +124,14 @@ class SoCLinux(SoCCore):
             l2_cache_size = 0)
         self.add_constant("SDRAM_TEST_DISABLE") # Skip SDRAM test to avoid corrupting pre-initialized contents.
 
+        # Example IP0
+        self.submodules.exampleip0 = ExampleIP0(
+            self.crg.cd_sys.clk,
+            self.crg.cd_sys.rst
+        )
+        self.add_csr("exampleip0")
+        platform.add_source("rtl/exampleip0.v")
+
     def generate_dts(self, board_name):
         json_src = os.path.join("build", board_name, "csr.json")
         dts = os.path.join("build", board_name, "{}.dts".format(board_name))
@@ -135,6 +143,20 @@ class SoCLinux(SoCCore):
         dts = os.path.join("build", board_name, "{}.dts".format(board_name))
         dtb = os.path.join("images", "rv32.dtb")
         os.system("dtc -O dtb -o {} {}".format(dtb, dts))
+
+# Example IP0
+
+class ExampleIP0(Module, AutoCSR):
+    def __init__(self, clk, rst):
+        self.en = CSRStorage(1, reset=0)
+        self.cnt = CSRStatus(32)
+        self.specials += Instance(
+            'exampleip0',
+            i_clk=clk,
+            i_rst=rst,
+            i_en=self.en.storage,
+            o_cnt=self.cnt.status
+        )
 
 # Build --------------------------------------------------------------------------------------------
 
