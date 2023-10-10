@@ -91,6 +91,7 @@ class SoCLinux(SoCCore):
 
         # SoCCore ----------------------------------------------------------------------------------
         SoCCore.__init__(self, platform, clk_freq=sys_clk_freq,
+            bus_standard             = "axi",
             cpu_type                 = "vexriscv_smp",
             cpu_variant              = "linux",
             integrated_rom_size      = 0x10000,
