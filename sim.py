@@ -18,8 +18,10 @@ from litex.build.sim.verilator import verilator_build_args, verilator_build_argd
 
 from litex.soc.interconnect.csr import *
 from litex.soc.integration.soc_core import *
+from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import *
 from litex.soc.interconnect import wishbone
+from litex.soc.interconnect import axi
 from litex.soc.cores.cpu.vexriscv_smp import VexRiscvSMP
 
 from litedram import modules as litedram_modules
@@ -125,6 +127,12 @@ class SoCLinux(SoCCore):
             l2_cache_size = 0)
         self.add_constant("SDRAM_TEST_DISABLE") # Skip SDRAM test to avoid corrupting pre-initialized contents.
 
+        # Example IP1
+        exampleip1_bus = axi.AXIInterface(data_width=32, address_width=16)
+        self.submodules.exampleip1 = ExampleIP1(self.crg.cd_sys.clk, self.crg.cd_sys.rst, exampleip1_bus)
+        self.bus.add_slave(name="exampleip1", slave=exampleip1_bus, region=SoCRegion(size=2**16, cached=False))
+        platform.add_source("rtl/exampleip1.v")
+
     def generate_dts(self, board_name):
         json_src = os.path.join("build", board_name, "csr.json")
         dts = os.path.join("build", board_name, "{}.dts".format(board_name))
@@ -136,6 +144,51 @@ class SoCLinux(SoCCore):
         dts = os.path.join("build", board_name, "{}.dts".format(board_name))
         dtb = os.path.join("images", "rv32.dtb")
         os.system("dtc -O dtb -o {} {}".format(dtb, dts))
+
+# Example IP1
+
+class ExampleIP1(Module, AutoCSR):
+    def __init__(self, clk, rst, axi_bus):
+        self.specials += Instance(
+            'exampleip1',
+            i_clk=clk,
+            i_rst=rst,
+            i_s_axi_awid=axi_bus.aw.id,
+            i_s_axi_awaddr=axi_bus.aw.addr,
+            i_s_axi_awlen=axi_bus.aw.len,
+            i_s_axi_awsize=axi_bus.aw.size,
+            i_s_axi_awburst=axi_bus.aw.burst,
+            i_s_axi_awlock=axi_bus.aw.lock,
+            i_s_axi_awcache=axi_bus.aw.cache,
+            i_s_axi_awprot=axi_bus.aw.prot,
+            i_s_axi_awvalid=axi_bus.aw.valid,
+            o_s_axi_awready=axi_bus.aw.ready,
+            i_s_axi_wdata=axi_bus.w.data,
+            i_s_axi_wstrb=axi_bus.w.strb,
+            i_s_axi_wlast=axi_bus.w.last,
+            i_s_axi_wvalid=axi_bus.w.valid,
+            o_s_axi_wready=axi_bus.w.ready,
+            o_s_axi_bid=axi_bus.b.id,
+            o_s_axi_bresp=axi_bus.b.resp,
+            o_s_axi_bvalid=axi_bus.b.valid,
+            i_s_axi_bready=axi_bus.b.ready,
+            i_s_axi_arid=axi_bus.ar.id,
+            i_s_axi_araddr=axi_bus.ar.addr,
+            i_s_axi_arlen=axi_bus.ar.len,
+            i_s_axi_arsize=axi_bus.ar.size,
+            i_s_axi_arburst=axi_bus.ar.burst,
+            i_s_axi_arlock=axi_bus.ar.lock,
+            i_s_axi_arcache=axi_bus.ar.cache,
+            i_s_axi_arprot=axi_bus.ar.prot,
+            i_s_axi_arvalid=axi_bus.ar.valid,
+            o_s_axi_arready=axi_bus.ar.ready,
+            o_s_axi_rid=axi_bus.r.id,
+            o_s_axi_rdata=axi_bus.r.data,
+            o_s_axi_rresp=axi_bus.r.resp,
+            o_s_axi_rlast=axi_bus.r.last,
+            o_s_axi_rvalid=axi_bus.r.valid,
+            i_s_axi_rready=axi_bus.r.ready
+        )
 
 # Build --------------------------------------------------------------------------------------------
 
