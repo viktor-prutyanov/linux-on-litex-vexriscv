@@ -11,7 +11,7 @@ import sys
 import argparse
 
 from litex.soc.integration.builder import Builder
-from litex.soc.cores.cpu.vexriscv_smp import VexRiscvSMP
+from litex.soc.cores.cpu.naxriscv import NaxRiscv
 
 from soc_linux import SoCLinux
 
@@ -145,7 +145,7 @@ class Genesys2(Board):
         from litex_boards.targets import digilent_genesys2
         Board.__init__(self, digilent_genesys2.BaseSoC, soc_capabilities={
             # Communication
-            "usb_fifo",
+            "serial",
             "ethernet",
             # Storage
             "sdcard",
@@ -840,7 +840,7 @@ def main():
     parser.add_argument("--spi-data-width", default=8,   type=int,       help="SPI data width (max bits per xfer).")
     parser.add_argument("--spi-clk-freq",   default=1e6, type=int,       help="SPI clock frequency.")
     parser.add_argument("--fdtoverlays",    default="",                  help="Device Tree Overlays to apply.")
-    VexRiscvSMP.args_fill(parser)
+    NaxRiscv.args_fill(parser)
     args = parser.parse_args()
 
     # Board(s) selection ---------------------------------------------------------------------------
@@ -859,17 +859,10 @@ def main():
 
         # CPU parameters ---------------------------------------------------------------------------
 
-        # If Wishbone Memory is forced, enabled L2 Cache (if not already):
-        if args.with_wishbone_memory:
-            soc_kwargs["l2_size"] = max(soc_kwargs["l2_size"], 2048) # Defaults to 2048.
-        # Else if board is configured to use L2 Cache, force use of Wishbone Memory on VexRiscv-SMP.
-        else:
-            args.with_wishbone_memory = soc_kwargs["l2_size"] != 0
-
         if "usb_host" in board.soc_capabilities:
             args.with_coherent_dma = True
 
-        VexRiscvSMP.args_read(args)
+        NaxRiscv.args_read(args)
 
         # SoC parameters ---------------------------------------------------------------------------
         if args.device is not None:

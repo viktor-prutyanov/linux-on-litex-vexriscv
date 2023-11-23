@@ -13,7 +13,7 @@ from migen import *
 
 from litex.soc.interconnect.csr import *
 
-from litex.soc.cores.cpu.vexriscv_smp import VexRiscvSMP
+from litex.soc.cores.cpu.naxriscv import NaxRiscv
 from litex.soc.cores.gpio import GPIOOut, GPIOIn
 from litex.soc.cores.spi import SPIMaster
 from litex.soc.cores.bitbang import I2CMaster
@@ -32,8 +32,8 @@ def SoCLinux(soc_cls, **kwargs):
 
             # SoC ----------------------------------------------------------------------------------
             soc_cls.__init__(self,
-                cpu_type       = "vexriscv_smp",
-                cpu_variant    = "linux",
+                cpu_type       = "naxriscv",
+                cpu_variant    = "standard",
                 **kwargs)
 
         # RGB Led ----------------------------------------------------------------------------------

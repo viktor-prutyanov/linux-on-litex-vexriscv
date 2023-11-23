@@ -20,7 +20,7 @@ from litex.soc.interconnect.csr import *
 from litex.soc.integration.soc_core import *
 from litex.soc.integration.builder import *
 from litex.soc.interconnect import wishbone
-from litex.soc.cores.cpu.vexriscv_smp import VexRiscvSMP
+from litex.soc.cores.cpu.naxriscv import NaxRiscv
 
 from litedram import modules as litedram_modules
 from litedram.phy.model import SDRAMPHYModel
@@ -91,8 +91,8 @@ class SoCLinux(SoCCore):
 
         # SoCCore ----------------------------------------------------------------------------------
         SoCCore.__init__(self, platform, clk_freq=sys_clk_freq,
-            cpu_type                 = "vexriscv_smp",
-            cpu_variant              = "linux",
+            cpu_type                 = "naxriscv",
+            cpu_variant              = "standard",
             integrated_rom_size      = 0x10000,
             uart_name                = "sim")
         self.add_config("DISABLE_DELAYS")
@@ -144,11 +144,11 @@ def main():
     parser.add_argument("--sdram-module",     default="MT48LC16M16",   help="Select SDRAM chip.")
     parser.add_argument("--sdram-data-width", default=32,              help="Set SDRAM chip data width.")
     parser.add_argument("--sdram-verbosity",  default=0,               help="Set SDRAM checker verbosity.")
-    VexRiscvSMP.args_fill(parser)
+    NaxRiscv.args_fill(parser)
     verilator_build_args(parser)
     args = parser.parse_args()
 
-    VexRiscvSMP.args_read(args)
+    NaxRiscv.args_read(args)
     verilator_build_kwargs = verilator_build_argdict(args)
     sim_config = SimConfig(default_clk="sys_clk")
     sim_config.add_module("serial2console", "serial")
