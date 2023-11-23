@@ -141,14 +141,13 @@ class NeTV2(Board):
 # Genesys2 support ---------------------------------------------------------------------------------
 
 class Genesys2(Board):
+    soc_kwargs = {"sys_clk_freq": 200e6}
     def __init__(self):
         from litex_boards.targets import digilent_genesys2
         Board.__init__(self, digilent_genesys2.BaseSoC, soc_capabilities={
             # Communication
             "serial",
             "ethernet",
-            # Storage
-            "sdcard",
         })
 
 # KC705 support ---------------------------------------------------------------------------------
