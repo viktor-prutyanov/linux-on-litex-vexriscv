@@ -148,6 +148,8 @@ class Genesys2(Board):
             # Communication
             "serial",
             "ethernet",
+            # Storage
+            "sdcard",
         })
 
 # KC705 support ---------------------------------------------------------------------------------
